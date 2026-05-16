@@ -14,9 +14,12 @@ func main() {
 		log.Println("Peringatan: File .env tidak ditemukan")
 	}
 
+	// Nyalakan Firebase dulu
+	config.InitFirebase()
+
+	// Baru nyalakan Database
 	config.InitDatabase()
 
-	// Menggunakan SetupRouter dari folder routes
 	r := routes.SetupRouter()
 
 	log.Println("Server berjalan di http://localhost:8080")
