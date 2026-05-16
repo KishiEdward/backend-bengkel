@@ -18,6 +18,7 @@ func SetupRouter() *gin.Engine {
 	// Inisialisasi Handler
 	pesananHandler := handlers.NewPesananHandler()
 	transaksiHandler := handlers.NewTransaksiHandler()
+	authHandler := handlers.NewAuthHandler()
 
 	// Grouping API v1
 	v1 := r.Group("/v1")
@@ -32,6 +33,9 @@ func SetupRouter() *gin.Engine {
 		// Rute untuk Transaksi
 		v1.POST("/pembayaran", transaksiHandler.CatatPembayaran)
 		v1.POST("/biaya-tambahan", transaksiHandler.CatatBiayaTambahan)
+
+		// Rute untuk Authentication
+		v1.POST("/login", authHandler.Login)
 	}
 
 	return r
