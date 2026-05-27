@@ -39,6 +39,7 @@ func (s *PesananService) CreatePesanan(
 
 		biayaDesigner := models.BiayaTambahan{
 			PesananID: pesanan.ID,
+			Kategori: "Jasa",
 			Keterangan: "Jasa Desainer",
 			Nominal: pesanan.BiayaDesain,
 		}
@@ -46,6 +47,37 @@ func (s *PesananService) CreatePesanan(
 		if err := s.pesananRepo.CreateBiayaTambahan(
 			&biayaDesigner,
 		); err != nil {
+
+			return err
+		}
+	}
+
+	// =====================
+	// AUTO INPUT JASA CNC
+	// =====================
+	if pesanan.JasaCNC &&
+		pesanan.BiayaCNC > 0 {
+
+		biayaCNC :=
+			models.BiayaTambahan{
+
+				PesananID:
+					pesanan.ID,
+
+				Kategori:
+					"jasa",
+
+				Keterangan:
+					"Jasa CNC",
+
+				Nominal:
+					pesanan.BiayaCNC,
+			}
+
+		if err := s.pesananRepo.
+			CreateBiayaTambahan(
+				&biayaCNC,
+			); err != nil {
 
 			return err
 		}
@@ -74,13 +106,27 @@ func (s *PesananService) GetDetailDanHitungMargin(id uint) (*models.Pesanan, map
 	}
 
 	// 3. Kalkulasi Total Biaya Tambahan (Overhead, Revisi, dll) saat proses WIP
+	var totalBiayaJasa float64 = 0
+
 	var totalBiayaTambahan float64 = 0
+	
 	for _, tambahan := range pesanan.BiayaTambahans {
-		totalBiayaTambahan += tambahan.Nominal
+	
+		if tambahan.Kategori == "jasa" {
+		
+			totalBiayaJasa += tambahan.Nominal
+		
+		} else {
+		
+			totalBiayaTambahan += tambahan.Nominal
+		}
 	}
 
 	// 4. Hitung HPP Aktual dan Margin Dinamis
-	hppAktual := totalBiayaMaterial + totalBiayaTambahan
+	hppAktual :=
+	totalBiayaMaterial +
+		totalBiayaJasa +
+		totalBiayaTambahan
 	marginAktual := pesanan.HargaJual - hppAktual
 
 	// 5. Hitung Sisa Tagihan (Total Pembayaran yang sudah masuk vs Harga Jual)
@@ -93,6 +139,7 @@ func (s *PesananService) GetDetailDanHitungMargin(id uint) (*models.Pesanan, map
 	// Bungkus hasil kalkulasi finansial ke dalam map
 	kalkulasiKeuangan := map[string]float64{
 		"total_biaya_material": totalBiayaMaterial,
+		"total_biaya_jasa": totalBiayaJasa,
 		"total_biaya_tambahan": totalBiayaTambahan,
 		"hpp_aktual":           hppAktual,
 		"margin_aktual":        marginAktual,

@@ -25,8 +25,11 @@ type Pesanan struct {
 	TglSelesai    *time.Time `json:"tgl_selesai"` // Menggunakan pointer karena bisa bernilai null saat WIP
 	Status        string     `gorm:"size:50;default:'Menunggu DP'" json:"status"`
 	HargaJual     float64    `json:"harga_jual"`
-	JasaDesainer bool    `json:"jasa_desainer"`
-	BiayaDesain float64 `json:"biaya_desain"` // Biaya khusus untuk jasa desainer
+	JasaDesainer bool `gorm:"-" json:"jasa_desainer"`
+	BiayaDesain float64 `gorm:"-" json:"biaya_desain"`
+	
+	JasaCNC bool `gorm:"-" json:"jasa_cnc"`
+	BiayaCNC float64 `gorm:"-" json:"biaya_cnc"`
 
 	// Relasi (Has Many) ke tabel operasional
 	Pembayarans      []Pembayaran      `gorm:"foreignKey:PesananID" json:"pembayaran"`
@@ -46,9 +49,10 @@ type Pembayaran struct {
 // 4. Model Biaya Tambahan (Kunci untuk Margin Dinamis)
 type BiayaTambahan struct {
 	gorm.Model
-	PesananID  uint    `json:"pesanan_id"`
-	Keterangan string  `gorm:"size:200" json:"keterangan"`
-	Nominal    float64 `json:"nominal"`
+	PesananID uint `json:"pesanan_id"`
+	Kategori string `gorm:"size:50" json:"kategori"`
+	Keterangan string `gorm:"size:200" json:"keterangan"`
+	Nominal float64 `json:"nominal"`
 }
 
 // 5. Model Material dan Pivot
