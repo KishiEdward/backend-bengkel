@@ -56,3 +56,13 @@ func (r *PesananRepository) FindByStatus(status string) ([]models.Pesanan, error
 		Find(&pesanans).Error
 	return pesanans, err
 }
+
+// =========================
+// CREATE BIAYA TAMBAHAN
+// =========================
+func (r *PesananRepository) CreateBiayaTambahan(
+	biaya *models.BiayaTambahan,
+) error {
+
+	return config.DB.Create(biaya).Error
+}

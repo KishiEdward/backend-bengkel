@@ -25,6 +25,8 @@ type Pesanan struct {
 	TglSelesai    *time.Time `json:"tgl_selesai"` // Menggunakan pointer karena bisa bernilai null saat WIP
 	Status        string     `gorm:"size:50;default:'Menunggu DP'" json:"status"`
 	HargaJual     float64    `json:"harga_jual"`
+	JasaDesainer bool    `json:"jasa_desainer"`
+	BiayaDesain float64 `json:"biaya_desain"` // Biaya khusus untuk jasa desainer
 
 	// Relasi (Has Many) ke tabel operasional
 	Pembayarans      []Pembayaran      `gorm:"foreignKey:PesananID" json:"pembayaran"`
@@ -52,9 +54,9 @@ type BiayaTambahan struct {
 // 5. Model Material dan Pivot
 type Material struct {
 	gorm.Model
-	Nama  string  `gorm:"size:100" json:"nama"`
-	Qty   int     `json:"qty"`
-	Harga float64 `json:"harga"`
+	Nama string `gorm:"size:100" json:"nama"`
+	Satuan string `gorm:"size:30" json:"satuan"`
+	HargaDefault float64 `json:"harga_default"`
 }
 
 type PesananMaterial struct {

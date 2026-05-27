@@ -20,9 +20,38 @@ func NewPesananService() *PesananService {
 }
 
 // CreatePesanan menangani logika pembuatan order baru
-func (s *PesananService) CreatePesanan(pesanan *models.Pesanan) error {
-	// Jika ada validasi bisnis (misal: harga jual tidak boleh 0), letakkan di sini
-	return s.pesananRepo.Create(pesanan)
+func (s *PesananService) CreatePesanan(
+	pesanan *models.Pesanan,
+) error {
+
+	// =====================
+	// SIMPAN PESANAN
+	// =====================
+	if err := s.pesananRepo.Create(pesanan); err != nil {
+		return err
+	}
+
+	// =====================
+	// AUTO INPUT BIAYA DESIGNER
+	// =====================
+	if pesanan.JasaDesainer &&
+		pesanan.BiayaDesain > 0 {
+
+		biayaDesigner := models.BiayaTambahan{
+			PesananID: pesanan.ID,
+			Keterangan: "Jasa Desainer",
+			Nominal: pesanan.BiayaDesain,
+		}
+
+		if err := s.pesananRepo.CreateBiayaTambahan(
+			&biayaDesigner,
+		); err != nil {
+
+			return err
+		}
+	}
+
+	return nil
 }
 
 // GetAll mengambil ringkasan seluruh pesanan

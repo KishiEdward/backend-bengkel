@@ -20,6 +20,8 @@ func SetupRouter() *gin.Engine {
 	pesananHandler := handlers.NewPesananHandler()
 	transaksiHandler := handlers.NewTransaksiHandler()
 	authHandler := handlers.NewAuthHandler()
+	customerHandler := handlers.NewCustomerHandler()
+	materialHandler := handlers.NewMaterialHandler()
 
 	// Grouping API v1
 	v1 := r.Group("/v1")
@@ -41,6 +43,14 @@ func SetupRouter() *gin.Engine {
 			// Rute untuk Transaksi
 			protected.POST("/pembayaran", transaksiHandler.CatatPembayaran)
 			protected.POST("/biaya-tambahan", transaksiHandler.CatatBiayaTambahan)
+
+			// Rute untuk Customer
+			protected.POST("/customers", customerHandler.Create)
+			protected.GET("/customers", customerHandler.GetAll)
+
+			// Rute untuk Material
+			protected.POST("/materials", materialHandler.Create)
+			protected.GET("/materials", materialHandler.GetAll)
 		}
 	}
 
