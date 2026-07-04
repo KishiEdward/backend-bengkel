@@ -197,25 +197,51 @@ func (s *PesananService) GetLaporan(bulan string, tahun string) ([]map[string]in
 	var countMenungguPelunasan int = 0
 	var countWIP int = 0
 	var countMenungguDP int = 0
+	var countBatal int = 0
 
 	// 2. Lakukan iterasi dan filter di dalam memori
 	for _, p := range pesanans {
 		// --- FILTER TANGGAL ---
-		tglStr := fmt.Sprintf("%v", p.TglOrder)
+		// --- FILTER TANGGAL ---
+		tglOrderStr := fmt.Sprintf("%v", p.TglOrder)
+		tglDeadlineStr := fmt.Sprintf("%v", p.TglDeadline) // Mengambil tanggal deadline
 
+		matchTahun := true
+		matchBulan := true
+
+		// Cek Tahun (Lolos jika Order atau Deadline sesuai)
 		if tahun != "Semua" && tahun != "" {
-			if !strings.HasPrefix(tglStr, tahun) {
-				continue
+			matchOrderTahun := strings.HasPrefix(tglOrderStr, tahun)
+			matchDeadlineTahun := strings.HasPrefix(tglDeadlineStr, tahun)
+			if !matchOrderTahun && !matchDeadlineTahun {
+				matchTahun = false
 			}
 		}
 
+		// Cek Bulan (Lolos jika Order atau Deadline sesuai)
 		if bulan != "Semua" && bulan != "" {
-			if len(tglStr) >= 7 {
-				bulanPesanan := tglStr[5:7]
-				if bulanPesanan != bulan {
-					continue
+			matchOrderBulan := false
+			matchDeadlineBulan := false
+
+			if len(tglOrderStr) >= 7 {
+				if tglOrderStr[5:7] == bulan {
+					matchOrderBulan = true
 				}
 			}
+			if len(tglDeadlineStr) >= 7 {
+				if tglDeadlineStr[5:7] == bulan {
+					matchDeadlineBulan = true
+				}
+			}
+
+			if !matchOrderBulan && !matchDeadlineBulan {
+				matchBulan = false
+			}
+		}
+
+		// Jika tidak cocok tahun atau bulan, skip iterasi ini
+		if !matchTahun || !matchBulan {
+			continue
 		}
 
 		// --- KALKULASI RINCIAN HPP ---
@@ -266,6 +292,8 @@ func (s *PesananService) GetLaporan(bulan string, tahun string) ([]map[string]in
 			countWIP++
 		case "menunggu dp":
 			countMenungguDP++
+		case "batal":
+			countBatal++
 		}
 
 		// --- REKAPITULASI (MASUK KE GRAND TOTAL) ---
@@ -308,6 +336,7 @@ func (s *PesananService) GetLaporan(bulan string, tahun string) ([]map[string]in
 		"count_menunggu_pelunasan": countMenungguPelunasan,
 		"count_wip":                countWIP,
 		"count_menunggu_dp":        countMenungguDP,
+		"count_batal":              countBatal,
 	}
 
 	return listLaporan, ringkasanGlobal, nil
