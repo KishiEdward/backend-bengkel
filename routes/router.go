@@ -4,12 +4,13 @@ import (
 	"net/http"
 
 	"github.com/KishiEdward/backend-bengkel.git/handlers"
-	"github.com/KishiEdward/backend-bengkel.git/middleware" // Pastikan import ini ada
+	"github.com/KishiEdward/backend-bengkel.git/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
+	r.Static("/uploads", "./uploads")
 
 	// Endpoint Ping - Public
 	r.GET("/ping", func(c *gin.Context) {
